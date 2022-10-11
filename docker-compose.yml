@@ -1,0 +1,39 @@
+version: "3.8"
+
+services:
+  prometheus:
+    image: prom/prometheus:latest
+    restart: always
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus-data:/var/lib/prometheus
+      # - ./alert.rules:/etc/prometheus/alert.rules
+    ports:
+      - 9090:9090
+    networks:
+      - my-network
+
+  grafana:
+    image: grafana/grafana:latest
+    environment:
+      GF_INSTALL_PLUGINS: "grafana-piechart-panel"
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: pass
+    restart: always
+    volumes:
+      - grafana-data:/var/lib/grafana
+      - ./grafana/provisioning/:/etc/grafana/provisioning
+    ports:
+      - 3000:3000
+    depends_on:
+      - prometheus
+    networks:
+      - my-network
+
+volumes:
+  prometheus-data:
+  grafana-data:
+
+networks:
+  my-network:
+    driver: bridge
